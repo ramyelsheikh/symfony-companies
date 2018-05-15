@@ -78,6 +78,8 @@ nelmio_cors:
         max_age: 3600
         hosts: []
         origin_regex: false
+    paths:
+        '^/': ~
  
 # FOSRest Configuration
 fos_rest:

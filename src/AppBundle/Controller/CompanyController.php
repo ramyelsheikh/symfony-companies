@@ -7,18 +7,21 @@ use FOS\RestBundle\View\View;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+
 
 /**
  * Company controller.
  *
- * @Route("companies")
+ * @Route("/companies")
  */
 class CompanyController extends Controller
 {
     /**
      * Lists all company entities.
      *
-     * @Route("/", name="companies_index")
+     * @Route("", name="companies_index")
      * @Method("GET")
      */
     public function indexAction()
@@ -27,18 +30,20 @@ class CompanyController extends Controller
 
         $companies = $em->getRepository('AppBundle:Company')->findAll();
 
-        return $this->render('company/index.html.twig', array(
-            'companies' => $companies,
-        ));
+        $serializer = $this->get('jms_serializer');
+
+        $response = $serializer->serialize($companies,'json');
+
+        return new Response($response);
     }
 
     /**
-     * Creates a new company entity.
+     * Create New Company.
      *
-     * @Route("/", name="companies_new")
-     * @Method({"POST"})
+     * @Route("", name="companies_create")
+     * @Method("POST")
      */
-    public function newAction(Request $request)
+    public function createAction(Request $request)
     {
         $data = new Company();
         $name = $request->get('name');
@@ -52,48 +57,51 @@ class CompanyController extends Controller
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
         $em->flush();
-        return new View("Company Added Successfully", Response::HTTP_OK);
+
+        return new View('Company Created Successfully', Response::HTTP_ACCEPTED);
     }
 
     /**
      * Finds and displays a company entity.
      *
-     * @Route("/{id}", name="companies_show")
+     * @Route("/{id}", name="companies_get")
      * @Method("GET")
      */
-    public function showAction(Company $company)
+    public function getAction(int $id)
     {
-        $deleteForm = $this->createDeleteForm($company);
-
-        return $this->render('company/show.html.twig', array(
-            'company' => $company,
-            'delete_form' => $deleteForm->createView(),
-        ));
+        $singleresult = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
+        if ($singleresult === null) {
+            return new View("company not found", Response::HTTP_NOT_FOUND);
+        }
+        return $singleresult;
     }
 
     /**
      * Displays a form to edit an existing company entity.
      *
-     * @Route("/{id}/edit", name="companies_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}", name="companies_edit")
+     * @Method("PUT")
      */
-    public function editAction(Request $request, Company $company)
+    public function editAction(int $id, Request $request)
     {
-        $deleteForm = $this->createDeleteForm($company);
-        $editForm = $this->createForm('AppBundle\Form\CompanyType', $company);
-        $editForm->handleRequest($request);
-
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirectToRoute('companies_edit', array('id' => $company->getId()));
+        $name = $request->get('name');
+        $address = $request->get('address');
+        $sn = $this->getDoctrine()->getManager();
+        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
+        if (empty($company)) {
+            return new View("company not found", Response::HTTP_NOT_FOUND);
         }
 
-        return $this->render('company/edit.html.twig', array(
-            'company' => $company,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
+        if(!empty($name)) {
+            $company->setName($name);
+        }
+        if(!empty($address)) {
+            $company->setAddress($address);
+        }
+
+        $sn->flush();
+
+        return new View("Company Updated Successfully", Response::HTTP_OK);
     }
 
     /**
@@ -102,33 +110,17 @@ class CompanyController extends Controller
      * @Route("/{id}", name="companies_delete")
      * @Method("DELETE")
      */
-    public function deleteAction(Request $request, Company $company)
+    public function deleteAction(int $id)
     {
-        $form = $this->createDeleteForm($company);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($company);
-            $em->flush();
+        $sn = $this->getDoctrine()->getManager();
+        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
+        if (empty($company)) {
+            return new View("company not found", Response::HTTP_NOT_FOUND);
         }
-
-        return $this->redirectToRoute('companies_index');
-    }
-
-    /**
-     * Creates a form to delete a company entity.
-     *
-     * @param Company $company The company entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(Company $company)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('companies_delete', array('id' => $company->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
+        else {
+            $sn->remove($company);
+            $sn->flush();
+        }
+        return new View("Company deleted successfully", Response::HTTP_OK);
     }
 }
