@@ -2,54 +2,52 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Company;
+use AppBundle\Entity\Relation;
 use AppBundle\Validation\ValidationErrorsHandler;
+use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\View\View;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use FOS\RestBundle\Controller\FOSRestController;
-
 
 /**
- * Company controller.
+ * Relation controller.
  *
- * @Route("/companies")
+ * @Route("/relations")
  */
-class CompanyController extends FOSRestController
+class RelationController extends FOSRestController
 {
     /**
-     * Lists all company entities.
+     * Lists all relation entities.
      *
-     * @Route("", name="companies_index")
+     * @Route("", name="relation_index")
      * @Method("GET")
      */
     public function indexAction()
     {
         $em = $this->getDoctrine()->getManager();
 
-        $companies = $em->getRepository('AppBundle:Company')->findAll();
+        $relations = $em->getRepository('AppBundle:Relation')->findAll();
 
         $serializer = $this->get('jms_serializer');
 
-        $response = $serializer->serialize($companies,'json');
+        $response = $serializer->serialize($relations,'json');
 
         return new Response($response, Response::HTTP_OK);
     }
 
     /**
-     * Create New Company.
+     * Creates a new relation entity.
      *
-     * @Route("", name="companies_create")
+     * @Route("", name="relation_new")
      * @Method("POST")
      */
     public function createAction(Request $request)
     {
-        $data = new Company();
+        $data = new Relation();
         $name = $request->get('name');
-        $address = $request->get('address');
 
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
@@ -61,7 +59,6 @@ class CompanyController extends FOSRestController
         }
 
         $data->setName($name);
-        $data->setAddress($address);
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
@@ -71,16 +68,16 @@ class CompanyController extends FOSRestController
     }
 
     /**
-     * Finds and displays a company entity.
+     * Finds and displays a relation entity.
      *
-     * @Route("/{id}", name="companies_get")
+     * @Route("/{id}", name="relation_show")
      * @Method("GET")
      */
     public function getAction(int $id)
     {
-        $singleresult = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
+        $singleresult = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
         if ($singleresult === null) {
-            return new View("company not found", Response::HTTP_NOT_FOUND);
+            return new View("relation not found", Response::HTTP_NOT_FOUND);
         }
 
         $serializer = $this->get('jms_serializer');
@@ -91,59 +88,57 @@ class CompanyController extends FOSRestController
     }
 
     /**
-     * Displays a form to edit an existing company entity.
+     * Displays a form to edit an existing relation entity.
      *
-     * @Route("/{id}", name="companies_edit")
+     * @Route("/{id}", name="relation_edit")
      * @Method("PUT")
      */
     public function editAction(int $id, Request $request)
     {
         $name = $request->get('name');
-        $address = $request->get('address');
+
         $sn = $this->getDoctrine()->getManager();
-        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
-        if (empty($company)) {
-            return new View("company not found", Response::HTTP_NOT_FOUND);
+        $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
+        if (empty($relation)) {
+            return new View("relation not found", Response::HTTP_NOT_FOUND);
         }
 
         if(!empty($name)) {
-            $company->setName($name);
-        }
-        if(!empty($address)) {
-            $company->setAddress($address);
+            $relation->setName($name);
         }
 
         $sn->flush();
 
         $serializer = $this->get('jms_serializer');
 
-        $response = $serializer->serialize($company,'json');
+        $response = $serializer->serialize($relation,'json');
 
         return new Response($response, Response::HTTP_OK);
     }
 
     /**
-     * Deletes a company entity.
+     * Deletes a relation entity.
      *
-     * @Route("/{id}", name="companies_delete")
+     * @Route("/{id}", name="relation_delete")
      * @Method("DELETE")
      */
     public function deleteAction(int $id)
     {
         $sn = $this->getDoctrine()->getManager();
-        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
-        if (empty($company)) {
-            return new View("company not found", Response::HTTP_NOT_FOUND);
+        $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
+        if (empty($relation)) {
+            return new View("relation not found", Response::HTTP_NOT_FOUND);
         }
         else {
-            $sn->remove($company);
+            $sn->remove($relation);
             $sn->flush();
         }
 
         $serializer = $this->get('jms_serializer');
 
-        $response = $serializer->serialize('Company Deleted Successfully','json');
+        $response = $serializer->serialize('Relation Deleted Successfully','json');
 
         return new Response($response, Response::HTTP_OK);
     }
+
 }

@@ -24,9 +24,9 @@ class Relation
     /**
      * @var string
      *
-     * @ORM\Column(name="relation_name", type="string", length=255)
+     * @ORM\Column(name="name", type="string", length=255)
      */
-    private $relationName;
+    private $name;
 
 
     /**
@@ -40,26 +40,26 @@ class Relation
     }
 
     /**
-     * Set relationName.
+     * Set name.
      *
-     * @param string $relationName
+     * @param string $name
      *
      * @return Relation
      */
-    public function setRelationName($relationName)
+    public function setName($name)
     {
-        $this->relationName = $relationName;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get relationName.
+     * Get name.
      *
      * @return string
      */
-    public function getRelationName()
+    public function getName()
     {
-        return $this->relationName;
+        return $this->name;
     }
 }
