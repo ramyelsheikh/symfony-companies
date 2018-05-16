@@ -127,6 +127,9 @@ class CompanyController extends FOSRestController
             $sn->remove($company);
             $sn->flush();
         }
-        return new View("Company deleted successfully", Response::HTTP_OK);
+
+        $view = $this->view("Company deleted successfully", Response::HTTP_ACCEPTED);
+
+        return $this->handleView($view);
     }
 }
