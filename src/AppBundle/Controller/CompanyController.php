@@ -3,8 +3,10 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Company;
+use AppBundle\Validation\ValidationErrorsHandler;
 use FOS\RestBundle\View\View;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -35,7 +37,7 @@ class CompanyController extends FOSRestController
 
         $response = $serializer->serialize($companies,'json');
 
-        return new Response($response);
+        return new Response($response, Response::HTTP_OK);
     }
 
     /**
@@ -50,19 +52,23 @@ class CompanyController extends FOSRestController
         $name = $request->get('name');
         $address = $request->get('address');
 
-        if(empty($name) || empty($address))
-        {
-            return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE);
+        $validator = $this->get('validator');
+        $errors = $validator->validate($data);
+
+
+        if (count($errors) > 0) {
+            $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
+            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
+
         $data->setName($name);
         $data->setAddress($address);
+
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
         $em->flush();
 
-        $view = $this->view($data, Response::HTTP_ACCEPTED);
-
-        return $this->handleView($view);
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
     /**
@@ -77,7 +83,12 @@ class CompanyController extends FOSRestController
         if ($singleresult === null) {
             return new View("company not found", Response::HTTP_NOT_FOUND);
         }
-        return $singleresult;
+
+        $serializer = $this->get('jms_serializer');
+
+        $response = $serializer->serialize($singleresult,'json');
+
+        return new Response($response, Response::HTTP_OK);
     }
 
     /**
@@ -105,9 +116,11 @@ class CompanyController extends FOSRestController
 
         $sn->flush();
 
-        $view = $this->view($company, Response::HTTP_ACCEPTED);
+        $serializer = $this->get('jms_serializer');
 
-        return $this->handleView($view);
+        $response = $serializer->serialize($company,'json');
+
+        return new Response($response, Response::HTTP_OK);
     }
 
     /**
@@ -128,8 +141,10 @@ class CompanyController extends FOSRestController
             $sn->flush();
         }
 
-        $view = $this->view("Company deleted successfully", Response::HTTP_ACCEPTED);
+        $serializer = $this->get('jms_serializer');
 
-        return $this->handleView($view);
+        $response = $serializer->serialize('Company Deleted Successfully','json');
+
+        return new Response($response, Response::HTTP_OK);
     }
 }
