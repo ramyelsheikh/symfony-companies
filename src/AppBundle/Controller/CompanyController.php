@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use FOS\RestBundle\Controller\FOSRestController;
 
 
 /**
@@ -16,7 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
  *
  * @Route("/companies")
  */
-class CompanyController extends Controller
+class CompanyController extends FOSRestController
 {
     /**
      * Lists all company entities.
@@ -48,6 +49,7 @@ class CompanyController extends Controller
         $data = new Company();
         $name = $request->get('name');
         $address = $request->get('address');
+
         if(empty($name) || empty($address))
         {
             return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE);
@@ -58,7 +60,9 @@ class CompanyController extends Controller
         $em->persist($data);
         $em->flush();
 
-        return new View('Company Created Successfully', Response::HTTP_ACCEPTED);
+        $view = $this->view($data, Response::HTTP_ACCEPTED);
+
+        return $this->handleView($view);
     }
 
     /**
@@ -101,7 +105,9 @@ class CompanyController extends Controller
 
         $sn->flush();
 
-        return new View("Company Updated Successfully", Response::HTTP_OK);
+        $view = $this->view($company, Response::HTTP_ACCEPTED);
+
+        return $this->handleView($view);
     }
 
     /**
