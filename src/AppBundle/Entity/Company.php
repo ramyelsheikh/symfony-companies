@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -50,6 +51,16 @@ class Company
      */
     private $address;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Employee", mappedBy="company")
+     */
+    private $employees;
+
+
+    public function __construct()
+    {
+        $this->employees = new ArrayCollection();
+    }
 
     /**
      * Get id.
