@@ -27,12 +27,12 @@ class Company
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
-     * @Assert\NotBlank(message="Please enter a clever nickname")
+     * @Assert\NotBlank(message="name field is required")
      * @Assert\Length(
      *      min = 3,
      *      max = 255,
-     *      minMessage = "Your first name must be at least {{ limit }} characters long",
-     *      maxMessage = "Your first name cannot be longer than {{ limit }} characters"
+     *      minMessage = "name field must be at least {{ limit }} characters long",
+     *      maxMessage = "name field cannot be longer than {{ limit }} characters"
      * )
      */
     private $name;
@@ -41,12 +41,12 @@ class Company
      * @var string
      *
      * @ORM\Column(name="address", type="text")
-     * @Assert\NotBlank(message="Please enter a clever nickname")
+     * @Assert\NotBlank(message="address field is required")
      * @Assert\Length(
      *      min = 3,
      *      max = 255,
-     *      minMessage = "Your first name must be at least {{ limit }} characters long",
-     *      maxMessage = "Your first name cannot be longer than {{ limit }} characters"
+     *      minMessage = "address field must be at least {{ limit }} characters long",
+     *      maxMessage = "address field cannot be longer than {{ limit }} characters"
      * )
      */
     private $address;

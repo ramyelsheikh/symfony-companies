@@ -54,7 +54,6 @@ class CompanyController extends FOSRestController
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
 
-
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
             return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);

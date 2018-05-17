@@ -92,3 +92,5 @@ fos_rest:
         view_response_listener: 'force'
         formats:
             json: true
+framework:
+    validation: { enable_annotations: true }
