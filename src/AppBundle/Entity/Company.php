@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Company
  *
  * @ORM\Table(name="company")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\CompanyRepository")
+ * @ORM\Entity
  */
 class Company
 {
@@ -21,7 +21,7 @@ class Company
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
@@ -33,7 +33,7 @@ class Company
      *      max = 255
      * )
      */
-    private $name;
+    protected $name;
 
     /**
      * @var string
@@ -45,14 +45,16 @@ class Company
      *      max = 255
      * )
      */
-    private $address;
+    protected $address;
 
     /**
      * @ORM\OneToMany(targetEntity="Employee", mappedBy="company")
      */
-    private $employees;
+    protected $employees;
 
-
+    /**
+     * Company constructor.
+     */
     public function __construct()
     {
         $this->employees = new ArrayCollection();

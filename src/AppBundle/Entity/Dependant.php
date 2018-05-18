@@ -3,12 +3,13 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Dependant
  *
  * @ORM\Table(name="dependant")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\DependantRepository")
+ * @ORM\Entity
  */
 class Dependant
 {
@@ -19,28 +20,29 @@ class Dependant
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
      */
-    private $name;
+    protected $name;
 
     /**
      * @var string
      *
      * @ORM\Column(name="phone_number", type="string", length=255)
      */
-    private $phoneNumber;
+    protected $phoneNumber;
 
     /**
      * @var string
      *
      * @ORM\Column(name="gender", type="string", length=1)
+     * @Assert\Choice(choices = {"m", "f"}, message = "Choose a valid gender.")
      */
-    private $gender;
+    protected $gender;
 
     /**
      * @var \DateTime
@@ -49,19 +51,6 @@ class Dependant
      */
     private $dateOfBirth;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="relation_id", type="integer")
-     */
-    private $relationId;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="employee_id", type="integer")
-     */
-    private $employeeId;
 
     /**
      * @ORM\ManyToOne(targetEntity="Employee", inversedBy="dependant")
@@ -189,9 +178,9 @@ class Dependant
      *
      * @return Dependant
      */
-    public function setRelationId($relationId)
+    public function setRelation(Relation $relation)
     {
-        $this->relationId = $relationId;
+        $this->relation = $relation;
 
         return $this;
     }
@@ -201,9 +190,9 @@ class Dependant
      *
      * @return int
      */
-    public function getRelationId()
+    public function getRelation()
     {
-        return $this->relationId;
+        return $this->relation;
     }
 
     /**
@@ -213,9 +202,9 @@ class Dependant
      *
      * @return Dependant
      */
-    public function setemployeeId($employeeId)
+    public function setEmployee(Employee $employee)
     {
-        $this->employeeId = $employeeId;
+        $this->employee = $employee;
 
         return $this;
     }
@@ -225,8 +214,8 @@ class Dependant
      *
      * @return int
      */
-    public function getemployeeId()
+    public function getEmployee()
     {
-        return $this->employeeId;
+        return $this->employee;
     }
 }

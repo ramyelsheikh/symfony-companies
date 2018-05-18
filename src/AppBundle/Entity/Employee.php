@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Employee
  *
  * @ORM\Table(name="employee")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\EmployeeRepository")
+ * @ORM\Entity
  */
 class Employee
 {
@@ -21,7 +21,7 @@ class Employee
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
@@ -33,7 +33,7 @@ class Employee
      *      max = 255
      * )
      */
-    private $name;
+    protected $name;
 
     /**
      * @var string
@@ -49,7 +49,7 @@ class Employee
      *     message="phone number pattern can contain only numbers, '+' and spaces"
      * )
      */
-    private $phoneNumber;
+    protected $phoneNumber;
 
     /**
      * @var string
@@ -61,7 +61,7 @@ class Employee
      *     message = "Choose a valid gender. either 'm' or 'f'"
      * )
      */
-    private $gender;
+    protected $gender;
 
     /**
      * @var \DateTime
@@ -72,7 +72,7 @@ class Employee
      *     message = "date field format must be 'YYYY-MM-DD'"
      * )
      */
-    private $dateOfBirth;
+    protected $dateOfBirth;
 
     /**
      * @var float
@@ -84,39 +84,26 @@ class Employee
      *     message="salary field is not a valid number."
      * )
      */
-    private $salary;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="company_id", type="integer")
-     * @Assert\NotBlank(message="company_id field is required")
-     */
-    private $companyId;
+    protected $salary;
 
     /**
      * @ORM\ManyToOne(targetEntity="Company", inversedBy="employee")
      * @ORM\JoinColumn(name="company_id", referencedColumnName="id")
      */
-    private $company;
-
-    function setCompany(\AppBundle\Entity\Company $company)
-    {
-        $this->company = $company;
-
-        return $this;
-    }
+    protected $company;
 
     /**
      * @ORM\OneToMany(targetEntity="Dependant", mappedBy="employee")
      */
-    private $dependants;
+    protected $dependants;
 
+    /**
+     * Employee constructor.
+     */
     public function __construct()
     {
         $this->dependants = new ArrayCollection();
     }
-
 
     /**
      * Get id.
@@ -249,26 +236,44 @@ class Employee
     }
 
     /**
-     * Set companyId.
+     * @param Company $company
      *
-     * @param int $companyId
-     *
-     * @return Employee
+     * @return $this
      */
-    public function setCompanyId($companyId)
+    public function setCompany(Company $company)
     {
-        $this->companyId = $companyId;
+        $this->company = $company;
 
         return $this;
     }
 
     /**
-     * Get companyId.
-     *
-     * @return int
+     * @return Company
      */
-    public function getCompanyId()
+    public function getCompany()
     {
-        return $this->companyId;
+        return $this->company;
     }
+
+    /**
+     * @return array
+     */
+    public function getDependants()
+    {
+        return $this->dependants->toArray();
+    }
+
+    /**
+     * @param Dependant $dependant
+     *
+     * @return $this
+     */
+    public function addDependant(Dependant $dependant)
+    {
+        $this->dependants->add($dependant);
+
+        return $this;
+    }
+
+
 }
