@@ -47,24 +47,21 @@ class RelationController extends FOSRestController
     public function createAction(Request $request)
     {
         $data = new Relation();
-        $name = $request->get('name');
+        $data->setName($request->get('name'));
 
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
-
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
             return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
-        $data->setName($name);
-
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
         $em->flush();
 
-        return new JsonResponse($data, Response::HTTP_OK);
+        return new View($data, Response::HTTP_OK);
     }
 
     /**
@@ -95,16 +92,20 @@ class RelationController extends FOSRestController
      */
     public function editAction(int $id, Request $request)
     {
-        $name = $request->get('name');
-
         $sn = $this->getDoctrine()->getManager();
         $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
         if (empty($relation)) {
             return new View("relation not found", Response::HTTP_NOT_FOUND);
         }
 
-        if(!empty($name)) {
-            $relation->setName($name);
+        $relation->setName($request->get('name'));
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($relation);
+
+        if (count($errors) > 0) {
+            $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
+            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
         $sn->flush();

@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Dependant;
+use AppBundle\Entity\Relation;
 use AppBundle\Validation\ValidationErrorsHandler;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\View\View;
@@ -47,30 +48,38 @@ class DependantController extends FOSRestController
     public function createAction(Request $request)
     {
         $data = new Dependant();
-        $name = $request->get('name');
-        $phoneNumber = $request->get('phone_number');
-        $gender = $request->get('gender');
-        $dateOfBirth = $request->get('date_of_birth');
+        $data->setName($request->get('name'));
+        $data->setPhoneNumber($request->get('phone_number'));
+        $data->setGender($request->get('gender'));
+        $data->setDateOfBirth(\DateTime::createFromFormat('Y-m-d', $request->get('date_of_birth')));
+        $data->setRelationId($request->get('relation_id'));
+        $data->setemployeeId($request->get('employee_id'));
 
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
-
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
             return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
-        $data->setName($name);
-        $data->setPhoneNumber($phoneNumber);
-        $data->setGender($gender);
-        $data->setDateOfBirth($dateOfBirth);
+        $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($request->get('relation_id'));
+        if($relation === NULL) {
+            return new View('Relation Not Found', Response::HTTP_BAD_REQUEST);
+        }
+        $data->setRelation($relation);
+
+        $employee = $this->getDoctrine()->getRepository('AppBundle:Employee')->find($request->get('employee_id'));
+        if($employee === NULL) {
+            return new View('Employee Not Found', Response::HTTP_BAD_REQUEST);
+        }
+        $data->setEmployee($employee);
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
         $em->flush();
 
-        return new JsonResponse($data, Response::HTTP_OK);
+        return new View($data, Response::HTTP_OK);
     }
 
     /**
@@ -101,29 +110,38 @@ class DependantController extends FOSRestController
      */
     public function editAction(int $id, Request $request)
     {
-        $name = $request->get('name');
-        $phoneNumber = $request->get('phone_number');
-        $gender = $request->get('gender');
-        $dateOfBirth = $request->get('date_of_birth');
-
         $sn = $this->getDoctrine()->getManager();
         $dependant = $this->getDoctrine()->getRepository('AppBundle:Dependant')->find($id);
         if (empty($dependant)) {
             return new View("dependant not found", Response::HTTP_NOT_FOUND);
         }
 
-        if(!empty($name)) {
-            $dependant->setName($name);
+        $dependant->setName($request->get('name'));
+        $dependant->setPhoneNumber($request->get('phone_number'));
+        $dependant->setGender($request->get('gender'));
+        $dependant->setDateOfBirth(\DateTime::createFromFormat('Y-m-d', $request->get('date_of_birth')));
+        $dependant->setRelationId($request->get('relation_id'));
+        $dependant->setemployeeId($request->get('employee_id'));
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($dependant);
+
+        if (count($errors) > 0) {
+            $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
+            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
-        if(!empty($phoneNumber)) {
-            $dependant->setPhoneNumber($phoneNumber);
+
+        $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($request->get('relation_id'));
+        if($relation === NULL) {
+            return new View('Relation Not Found', Response::HTTP_BAD_REQUEST);
         }
-        if(!empty($gender)) {
-            $dependant->setGender($gender);
+        $dependant->setRelation($relation);
+
+        $employee = $this->getDoctrine()->getRepository('AppBundle:Employee')->find($request->get('employee_id'));
+        if($employee === NULL) {
+            return new View('Employee Not Found', Response::HTTP_BAD_REQUEST);
         }
-        if(!empty($dateOfBirth)) {
-            $dependant->setPhoneNumber($dateOfBirth);
-        }
+        $dependant->setEmployee($employee);
 
         $sn->flush();
 

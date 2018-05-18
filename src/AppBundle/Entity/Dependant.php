@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Dependant
@@ -25,6 +26,11 @@ class Dependant
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Length(
+     *      min = 5,
+     *      max = 255
+     * )
      */
     private $name;
 
@@ -32,6 +38,15 @@ class Dependant
      * @var string
      *
      * @ORM\Column(name="phone_number", type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Length(
+     *      min = 5,
+     *      max = 255
+     * )
+     * @Assert\Regex(
+     *     pattern="/^[0-9+\s]*$/",
+     *     message="phone number pattern can contain only numbers, '+' and spaces"
+     * )
      */
     private $phoneNumber;
 
@@ -39,6 +54,11 @@ class Dependant
      * @var string
      *
      * @ORM\Column(name="gender", type="string", length=1)
+     * @Assert\NotBlank(message="gender field is required")
+     * @Assert\Choice(
+     *     choices = { "m", "f"},
+     *     message = "Choose a valid gender. either 'm' or 'f'"
+     * )
      */
     private $gender;
 
@@ -46,6 +66,10 @@ class Dependant
      * @var \DateTime
      *
      * @ORM\Column(name="date_of_birth", type="date")
+     * @Assert\NotBlank(message="date_of_birth field is required")
+     * @Assert\Date(
+     *     message = "date field format must be 'YYYY-MM-DD'"
+     * )
      */
     private $dateOfBirth;
 
@@ -53,6 +77,7 @@ class Dependant
      * @var int
      *
      * @ORM\Column(name="relation_id", type="integer")
+     * @Assert\NotBlank(message="relation_id field is required")
      */
     private $relationId;
 
@@ -60,6 +85,7 @@ class Dependant
      * @var int
      *
      * @ORM\Column(name="employee_id", type="integer")
+     * @Assert\NotBlank(message="employee_id field is required")
      */
     private $employeeId;
 
@@ -228,5 +254,33 @@ class Dependant
     public function getemployeeId()
     {
         return $this->employeeId;
+    }
+
+    /**
+     * Set Employee.
+     *
+     * @param \AppBundle\Entity\Employee $employee
+     *
+     * @return Dependant
+     */
+    function setEmployee(\AppBundle\Entity\Employee $employee)
+    {
+        $this->employee = $employee;
+
+        return $this;
+    }
+
+    /**
+     * Set Relation.
+     *
+     * @param \AppBundle\Entity\Relation $relation
+     *
+     * @return Dependant
+     */
+    function setRelation(\AppBundle\Entity\Relation $relation)
+    {
+        $this->relation = $relation;
+
+        return $this;
     }
 }

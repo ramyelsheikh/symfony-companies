@@ -266,9 +266,9 @@ class Employee
     }
 
     /**
-     * Set name.
+     * Set Company.
      *
-     * @param string $name
+     * @param \AppBundle\Entity\Company $company
      *
      * @return Employee
      */

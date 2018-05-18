@@ -71,7 +71,6 @@ class EmployeeController extends FOSRestController
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
-
         $em->flush();
 
         return new View($data, Response::HTTP_OK);
