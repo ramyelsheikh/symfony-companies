@@ -7,7 +7,6 @@ use AppBundle\Entity\Employee;
 use AppBundle\Validation\ValidationErrorsHandler;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\View\View;
-use http\Exception\InvalidArgumentException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -56,21 +55,19 @@ class EmployeeController extends FOSRestController
         $data->setSalary($request->get('salary'));
         $data->setCompanyId($request->get('company_id'));
 
-        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($request->get('company_id'));
-        if($company === NULL) {
-            return new View('Company Not Found', Response::HTTP_BAD_REQUEST);
-        }
-        $data->setCompany($company);
-        
-
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
-
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
             return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
+
+        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($request->get('company_id'));
+        if($company === NULL) {
+            return new View('Company Not Found', Response::HTTP_BAD_REQUEST);
+        }
+        $data->setCompany($company);
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
@@ -108,33 +105,32 @@ class EmployeeController extends FOSRestController
      */
     public function editAction(int $id, Request $request)
     {
-        $name = $request->get('name');
-        $phoneNumber = $request->get('phone_number');
-        $gender = $request->get('gender');
-        $dateOfBirth = $request->get('date_of_birth');
-        $salary = $request->get('salary');
-
         $sn = $this->getDoctrine()->getManager();
         $employee = $this->getDoctrine()->getRepository('AppBundle:Employee')->find($id);
         if (empty($employee)) {
             return new View("employee not found", Response::HTTP_NOT_FOUND);
         }
 
-        if(!empty($name)) {
-            $employee->setName($name);
+        $employee->setName($request->get('name'));
+        $employee->setPhoneNumber($request->get('phone_number'));
+        $employee->setGender($request->get('gender'));
+        $employee->setDateOfBirth(\DateTime::createFromFormat('Y-m-d', $request->get('date_of_birth')));
+        $employee->setSalary($request->get('salary'));
+        $employee->setCompanyId($request->get('company_id'));
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($employee);
+
+        if (count($errors) > 0) {
+            $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
+            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
-        if(!empty($phoneNumber)) {
-            $employee->setPhoneNumber($phoneNumber);
+
+        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($request->get('company_id'));
+        if($company === NULL) {
+            return new View('Company Not Found', Response::HTTP_BAD_REQUEST);
         }
-        if(!empty($gender)) {
-            $employee->setGender($gender);
-        }
-        if(!empty($dateOfBirth)) {
-            $employee->setPhoneNumber($dateOfBirth);
-        }
-        if(!empty($salary)) {
-            $employee->setSalary($salary);
-        }
+        $employee->setCompany($company);
 
         $sn->flush();
 

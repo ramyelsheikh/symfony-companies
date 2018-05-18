@@ -94,19 +94,21 @@ class CompanyController extends FOSRestController
      */
     public function editAction(int $id, Request $request)
     {
-        $name = $request->get('name');
-        $address = $request->get('address');
         $sn = $this->getDoctrine()->getManager();
         $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
         if (empty($company)) {
             return new View("company not found", Response::HTTP_NOT_FOUND);
         }
 
-        if(!empty($name)) {
-            $company->setName($name);
-        }
-        if(!empty($address)) {
-            $company->setAddress($address);
+        $company->setName($request->get('name'));
+        $company->setAddress($request->get('address'));
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($company);
+
+        if (count($errors) > 0) {
+            $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
+            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
         $sn->flush();

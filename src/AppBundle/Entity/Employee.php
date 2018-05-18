@@ -100,23 +100,16 @@ class Employee
      */
     private $company;
 
-    function setCompany(\AppBundle\Entity\Company $company)
-    {
-        $this->company = $company;
-
-        return $this;
-    }
-
     /**
      * @ORM\OneToMany(targetEntity="Dependant", mappedBy="employee")
      */
     private $dependants;
 
+
     public function __construct()
     {
         $this->dependants = new ArrayCollection();
     }
-
 
     /**
      * Get id.
@@ -270,5 +263,19 @@ class Employee
     public function getCompanyId()
     {
         return $this->companyId;
+    }
+
+    /**
+     * Set name.
+     *
+     * @param string $name
+     *
+     * @return Employee
+     */
+    function setCompany(\AppBundle\Entity\Company $company)
+    {
+        $this->company = $company;
+
+        return $this;
     }
 }
