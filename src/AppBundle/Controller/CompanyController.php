@@ -5,13 +5,11 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Company;
 use AppBundle\Validation\ValidationErrorsHandler;
 use FOS\RestBundle\View\View;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use FOS\RestBundle\Controller\Annotations\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use FOS\RestBundle\Controller\FOSRestController;
-
 
 /**
  * Company controller.
@@ -29,14 +27,8 @@ class CompanyController extends FOSRestController
     public function indexAction()
     {
         $em = $this->getDoctrine()->getManager();
-
         $companies = $em->getRepository('AppBundle:Company')->findAll();
-
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($companies,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $companies;
     }
 
     /**
@@ -51,12 +43,13 @@ class CompanyController extends FOSRestController
         $data->setName($request->get('name'));
         $data->setAddress($request->get('address'));
 
+        // Validate Company entity
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
-            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
+            return new View($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -72,50 +65,43 @@ class CompanyController extends FOSRestController
      * @Route("/{id}", name="companies_get")
      * @Method("GET")
      */
-    public function getAction(int $id)
+    public function getAction(Company $company)
     {
-        $singleresult = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
-        if ($singleresult === null) {
-            return new View("company not found", Response::HTTP_NOT_FOUND);
-        }
-
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($singleresult,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $company;
     }
 
     /**
-     * Displays a form to edit an existing company entity.
+     * Edit an existing company entity.
      *
      * @Route("/{id}", name="companies_edit")
-     * @Method("PUT")
+     * @Method({"PUT", "PATCH"})
      */
-    public function editAction(int $id, Request $request)
+    public function editAction(Request $request)
     {
-        $name = $request->get('name');
-        $address = $request->get('address');
-        $sn = $this->getDoctrine()->getManager();
-        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
+        $name = $request->request->get('name');
+        $address = $request->request->get('address');
+
         if (empty($company)) {
-            return new View("company not found", Response::HTTP_NOT_FOUND);
+            return new View(
+                [
+                    'status' => false,
+                    'msg'    => 'Company not found',
+                ],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        if(!empty($name)) {
+        if (!empty($name)) {
             $company->setName($name);
         }
-        if(!empty($address)) {
+
+        if (!empty($address)) {
             $company->setAddress($address);
         }
 
+        $sn = $this->getDoctrine()->getManager();
         $sn->flush();
-
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($company,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $company;
     }
 
     /**
@@ -124,22 +110,22 @@ class CompanyController extends FOSRestController
      * @Route("/{id}", name="companies_delete")
      * @Method("DELETE")
      */
-    public function deleteAction(int $id)
+    public function deleteAction(Company $company)
     {
-        $sn = $this->getDoctrine()->getManager();
-        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($id);
         if (empty($company)) {
             return new View("company not found", Response::HTTP_NOT_FOUND);
-        }
-        else {
+        } else {
+            $sn = $this->getDoctrine()->getManager();
             $sn->remove($company);
             $sn->flush();
         }
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize('Company Deleted Successfully','json');
-
-        return new Response($response, Response::HTTP_OK);
+        return new View(
+            [
+                'status' => true,
+                'msg'    => 'Company Deleted Successfully',
+            ],
+            Response::HTTP_OK
+        );
     }
 }
