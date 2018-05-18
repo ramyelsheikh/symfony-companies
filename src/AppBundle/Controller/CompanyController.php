@@ -48,8 +48,8 @@ class CompanyController extends FOSRestController
     public function createAction(Request $request)
     {
         $data = new Company();
-        $name = $request->get('name');
-        $address = $request->get('address');
+        $data->setName($request->get('name'));
+        $data->setAddress($request->get('address'));
 
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
@@ -59,14 +59,11 @@ class CompanyController extends FOSRestController
             return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
-        $data->setName($name);
-        $data->setAddress($address);
-
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
         $em->flush();
 
-        return new JsonResponse($data, Response::HTTP_OK);
+        return new View($data, Response::HTTP_OK);
     }
 
     /**

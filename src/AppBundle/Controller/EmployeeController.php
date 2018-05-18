@@ -2,10 +2,12 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Company;
 use AppBundle\Entity\Employee;
 use AppBundle\Validation\ValidationErrorsHandler;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\View\View;
+use http\Exception\InvalidArgumentException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -47,11 +49,19 @@ class EmployeeController extends FOSRestController
     public function createAction(Request $request)
     {
         $data = new Employee();
-        $name = $request->get('name');
-        $phoneNumber = $request->get('phone_number');
-        $gender = $request->get('gender');
-        $dateOfBirth = $request->get('date_of_birth');
-        $salary = $request->get('salary');
+        $data->setName($request->get('name'));
+        $data->setPhoneNumber($request->get('phone_number'));
+        $data->setGender($request->get('gender'));
+        $data->setDateOfBirth(\DateTime::createFromFormat('Y-m-d', $request->get('date_of_birth')));
+        $data->setSalary($request->get('salary'));
+        $data->setCompanyId($request->get('company_id'));
+
+        $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($request->get('company_id'));
+        if($company === NULL) {
+            return new View('Company Not Found', Response::HTTP_BAD_REQUEST);
+        }
+        $data->setCompany($company);
+        
 
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
@@ -62,17 +72,12 @@ class EmployeeController extends FOSRestController
             return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
         }
 
-        $data->setName($name);
-        $data->setPhoneNumber($phoneNumber);
-        $data->setGender($gender);
-        $data->setDateOfBirth($dateOfBirth);
-        $data->setSalary($salary);
-
         $em = $this->getDoctrine()->getManager();
         $em->persist($data);
+
         $em->flush();
 
-        return new JsonResponse($data, Response::HTTP_OK);
+        return new View($data, Response::HTTP_OK);
     }
 
     /**

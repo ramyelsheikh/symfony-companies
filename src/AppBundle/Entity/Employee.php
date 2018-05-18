@@ -27,12 +27,10 @@ class Employee
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
-     * @Assert\NotBlank(message="name field is required")
+     * @Assert\NotBlank()
      * @Assert\Length(
      *      min = 5,
-     *      max = 255,
-     *      minMessage = "name field must be at least {{ limit }} characters long",
-     *      maxMessage = "name field cannot be longer than {{ limit }} characters"
+     *      max = 255
      * )
      */
     private $name;
@@ -41,15 +39,13 @@ class Employee
      * @var string
      *
      * @ORM\Column(name="phone_number", type="string", length=255)
-     * @Assert\NotBlank(message="phone_number field is required")
+     * @Assert\NotBlank()
      * @Assert\Length(
      *      min = 5,
-     *      max = 255,
-     *      minMessage = "phone_number field must be at least {{ limit }} characters long",
-     *      maxMessage = "phone_number field cannot be longer than {{ limit }} characters"
+     *      max = 255
      * )
      * @Assert\Regex(
-     *     pattern="/[0-9+\s]?/g",
+     *     pattern="/^[0-9+\s]*$/",
      *     message="phone number pattern can contain only numbers, '+' and spaces"
      * )
      */
@@ -95,7 +91,6 @@ class Employee
      *
      * @ORM\Column(name="company_id", type="integer")
      * @Assert\NotBlank(message="company_id field is required")
-     * @Assert\Valid
      */
     private $companyId;
 
@@ -104,6 +99,13 @@ class Employee
      * @ORM\JoinColumn(name="company_id", referencedColumnName="id")
      */
     private $company;
+
+    function setCompany(\AppBundle\Entity\Company $company)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
 
     /**
      * @ORM\OneToMany(targetEntity="Dependant", mappedBy="employee")

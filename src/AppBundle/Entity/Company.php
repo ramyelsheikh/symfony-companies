@@ -27,12 +27,10 @@ class Company
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
-     * @Assert\NotBlank(message="name field is required")
+     * @Assert\NotBlank()
      * @Assert\Length(
      *      min = 3,
-     *      max = 255,
-     *      minMessage = "name field must be at least {{ limit }} characters long",
-     *      maxMessage = "name field cannot be longer than {{ limit }} characters"
+     *      max = 255
      * )
      */
     private $name;
@@ -41,12 +39,10 @@ class Company
      * @var string
      *
      * @ORM\Column(name="address", type="text")
-     * @Assert\NotBlank(message="address field is required")
+     * @Assert\NotBlank()
      * @Assert\Length(
      *      min = 3,
-     *      max = 255,
-     *      minMessage = "address field must be at least {{ limit }} characters long",
-     *      maxMessage = "address field cannot be longer than {{ limit }} characters"
+     *      max = 255
      * )
      */
     private $address;
