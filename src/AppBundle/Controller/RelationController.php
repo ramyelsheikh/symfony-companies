@@ -4,11 +4,11 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Relation;
 use AppBundle\Validation\ValidationErrorsHandler;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\View\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use FOS\RestBundle\Controller\Annotations\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -31,11 +31,7 @@ class RelationController extends FOSRestController
 
         $relations = $em->getRepository('AppBundle:Relation')->findAll();
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($relations,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $relations;
     }
 
     /**
@@ -49,12 +45,13 @@ class RelationController extends FOSRestController
         $data = new Relation();
         $data->setName($request->get('name'));
 
+        //Validate Relation Entity
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
-            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
+            return new View(['status' => false, 'errors' => $validationErrors], Response::HTTP_BAD_REQUEST);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -74,18 +71,14 @@ class RelationController extends FOSRestController
     {
         $singleresult = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
         if ($singleresult === null) {
-            return new View("relation not found", Response::HTTP_NOT_FOUND);
+            return new View(['status' => false, 'errors'    => 'relation not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($singleresult,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $singleresult;
     }
 
     /**
-     * Displays a form to edit an existing relation entity.
+     * Edit an existing relation entity.
      *
      * @Route("/{id}", name="relation_edit")
      * @Method("PUT")
@@ -95,7 +88,7 @@ class RelationController extends FOSRestController
         $sn = $this->getDoctrine()->getManager();
         $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
         if (empty($relation)) {
-            return new View("relation not found", Response::HTTP_NOT_FOUND);
+            return new View(['status' => false, 'msg' => 'relation not found'], Response::HTTP_NOT_FOUND);
         }
 
         $relation->setName($request->get('name'));
@@ -105,16 +98,12 @@ class RelationController extends FOSRestController
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
-            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
+            return new View(['status' => false, 'errors'    => $validationErrors], Response::HTTP_BAD_REQUEST);
         }
 
         $sn->flush();
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($relation,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $relation;
     }
 
     /**
@@ -128,18 +117,18 @@ class RelationController extends FOSRestController
         $sn = $this->getDoctrine()->getManager();
         $relation = $this->getDoctrine()->getRepository('AppBundle:Relation')->find($id);
         if (empty($relation)) {
-            return new View("relation not found", Response::HTTP_NOT_FOUND);
+            return new View(['status' => false, 'msg' => 'relation not found'], Response::HTTP_NOT_FOUND);
         }
         else {
-            $sn->remove($relation);
-            $sn->flush();
+            try {
+                $sn->remove($relation);
+                $sn->flush();
+            } catch (ForeignKeyConstraintViolationException $e) {
+                return new View(['status' => false, 'msg'    => 'Relation is related to some data and cannot be deleted']);
+            }
         }
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize('Relation Deleted Successfully','json');
-
-        return new Response($response, Response::HTTP_OK);
+        return new View(['status' => true, 'msg'    => 'Relation Deleted Successfully'], Response::HTTP_OK);
     }
 
 }

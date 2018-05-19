@@ -5,11 +5,11 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Company;
 use AppBundle\Entity\Employee;
 use AppBundle\Validation\ValidationErrorsHandler;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\View\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use FOS\RestBundle\Controller\Annotations\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,11 +32,7 @@ class EmployeeController extends FOSRestController
 
         $employees = $em->getRepository('AppBundle:Employee')->findAll();
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($employees,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $employees;
     }
 
     /**
@@ -55,17 +51,18 @@ class EmployeeController extends FOSRestController
         $data->setSalary($request->get('salary'));
         $data->setCompanyId($request->get('company_id'));
 
+        //Validate Employee Entity
         $validator = $this->get('validator');
         $errors = $validator->validate($data);
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
-            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
+            return new View(['status' => false, 'errors'    => $validationErrors], Response::HTTP_BAD_REQUEST);
         }
 
         $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($request->get('company_id'));
         if($company === NULL) {
-            return new View('Company Not Found', Response::HTTP_BAD_REQUEST);
+            return new View(['status' => false, 'errors'    => 'Company Not Found'], Response::HTTP_BAD_REQUEST);
         }
         $data->setCompany($company);
 
@@ -86,18 +83,14 @@ class EmployeeController extends FOSRestController
     {
         $singleresult = $this->getDoctrine()->getRepository('AppBundle:Employee')->find($id);
         if ($singleresult === null) {
-            return new View("employee not found", Response::HTTP_NOT_FOUND);
+            return new View(['status' => false, 'errors'    => 'employee not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($singleresult,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $singleresult;
     }
 
     /**
-     * Displays a form to edit an existing employee entity.
+     * Edit an existing employee entity.
      *
      * @Route("/{id}", name="employees_edit")
      * @Method("PUT")
@@ -107,7 +100,7 @@ class EmployeeController extends FOSRestController
         $sn = $this->getDoctrine()->getManager();
         $employee = $this->getDoctrine()->getRepository('AppBundle:Employee')->find($id);
         if (empty($employee)) {
-            return new View("employee not found", Response::HTTP_NOT_FOUND);
+            return new View(['status' => false, 'msg' => 'employee not found'], Response::HTTP_NOT_FOUND);
         }
 
         $employee->setName($request->get('name'));
@@ -122,22 +115,18 @@ class EmployeeController extends FOSRestController
 
         if (count($errors) > 0) {
             $validationErrors = ValidationErrorsHandler::violationsToArray($errors);
-            return new JsonResponse($validationErrors, Response::HTTP_BAD_REQUEST);
+            return new View(['status' => false, 'errors'    => $validationErrors], Response::HTTP_BAD_REQUEST);
         }
 
         $company = $this->getDoctrine()->getRepository('AppBundle:Company')->find($request->get('company_id'));
         if($company === NULL) {
-            return new View('Company Not Found', Response::HTTP_BAD_REQUEST);
+            return new View(['status' => false, 'msg' => 'company not found'], Response::HTTP_BAD_REQUEST);
         }
         $employee->setCompany($company);
 
         $sn->flush();
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize($employee,'json');
-
-        return new Response($response, Response::HTTP_OK);
+        return $employee;
     }
 
     /**
@@ -151,18 +140,18 @@ class EmployeeController extends FOSRestController
         $sn = $this->getDoctrine()->getManager();
         $employee = $this->getDoctrine()->getRepository('AppBundle:Employee')->find($id);
         if (empty($employee)) {
-            return new View("employee not found", Response::HTTP_NOT_FOUND);
+            return new View(['status' => false, 'msg'    => 'employee not found'], Response::HTTP_NOT_FOUND);
         }
         else {
-            $sn->remove($employee);
-            $sn->flush();
+            try {
+                $sn->remove($employee);
+                $sn->flush();
+            } catch (ForeignKeyConstraintViolationException $e) {
+                return new View(['status' => false, 'msg'    => 'Employee is related to some data and cannot be deleted']);
+            }
         }
 
-        $serializer = $this->get('jms_serializer');
-
-        $response = $serializer->serialize('Employee Deleted Successfully','json');
-
-        return new Response($response, Response::HTTP_OK);
+        return new View(['status' => true, 'msg'    => 'Employee Deleted Successfully'], Response::HTTP_OK);
     }
 
 }
