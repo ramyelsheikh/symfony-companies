@@ -29,13 +29,13 @@ php app/console server:run
 
 Then find the site at http://localhost:8000.
 
-## In Progress:
+## TODO List:
 
 1. update symfony to symfony 3.4 or 4.0 to work on swagger and create Rest API documentation. 
 
 
 ## Notes:
-Current API Documentation below:
+While Updating Symfony and Creating Swagger Documentation, You can find API Documentation below:
 
 ####Companies
 
