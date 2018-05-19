@@ -2,16 +2,21 @@
 
 ## Setup the Project
 
+1. Clone the project to your Server:
 
-1. Make sure you have [Composer installed](https://getcomposer.org/).
+```bash
+git clone git@github.com:ramyelsheikh/symfony-companies.git
+```
 
-2. Install the composer dependencies:
+2. Make sure you have [Composer installed](https://getcomposer.org/).
+
+3. Install the composer dependencies:
 
 ```bash
 composer install
 ```
 
-3. Load up your database
+4. Load up your database
 
 Make sure `app/config/parameters.yml` is correct for your database
 credentials. Then:
@@ -21,7 +26,7 @@ php app/console doctrine:database:create
 php app/console doctrine:schema:update --force
 ```
 
-4. Start up the built-in PHP web server:
+5. Start up the built-in PHP web server:
 
 ```bash
 php app/console server:run
