@@ -6,50 +6,81 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class EmployeeControllerTest extends WebTestCase
 {
-    /*
-    public function testCompleteScenario()
+    protected $client;
+
+    /**
+     * EmployeeControllerTest constructor.
+     */
+    public function __construct()
     {
+        parent::__construct();
         // Create a new client to browse the application
-        $client = static::createClient();
-
-        // Create a new entry in the database
-        $crawler = $client->request('GET', '/employees/');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), "Unexpected HTTP status code for GET /employees/");
-        $crawler = $client->click($crawler->selectLink('Create a new entry')->link());
-
-        // Fill in the form and submit it
-        $form = $crawler->selectButton('Create')->form(array(
-            'appbundle_employee[field_name]'  => 'Test',
-            // ... other fields to fill
-        ));
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check data in the show view
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("Test")')->count(), 'Missing element td:contains("Test")');
-
-        // Edit the entity
-        $crawler = $client->click($crawler->selectLink('Edit')->link());
-
-        $form = $crawler->selectButton('Update')->form(array(
-            'appbundle_employee[field_name]'  => 'Foo',
-            // ... other fields to fill
-        ));
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check the element contains an attribute with value equals "Foo"
-        $this->assertGreaterThan(0, $crawler->filter('[value="Foo"]')->count(), 'Missing element [value="Foo"]');
-
-        // Delete the entity
-        $client->submit($crawler->selectButton('Delete')->form());
-        $crawler = $client->followRedirect();
-
-        // Check the entity has been delete on the list
-        $this->assertNotRegExp('/Foo/', $client->getResponse()->getContent());
+        $this->client = static::createClient();
     }
 
-    */
+    public function testEmployeeIndex()
+    {
+        // Test employee listing
+        $this->client->request('GET', '/employees');
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for GET /employees"
+        );
+    }
+
+    public function testEmployeeCreate()
+    {
+        // Create a new entry in the database
+        $employeeData = [
+            'name' => 'Test Employee',
+            'phone_number' => '+9715845121212',
+            'gender' => 'm',
+            'date_of_birth' => '1988-01-15',
+            'salary' => '20000',
+            'company_id' => '34'
+        ];
+
+        $this->client->request('POST', '/employees', $employeeData);
+
+        $this->assertEquals(
+            201,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for POST /employees"
+        );
+    }
+
+    public function testEmployeeEdit()
+    {
+        // Create a new entry in the database
+        $employeeData = [
+            'name' => 'Test Employee',
+            'phone_number' => '+9715845121212',
+            'gender' => 'm',
+            'date_of_birth' => '1988-01-15',
+            'salary' => '20000',
+            'company_id' => '34'
+        ];
+
+        $this->client->request('PUT', '/employees/14', $employeeData);
+
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for PUT /employees/14"
+        );
+    }
+
+    public function testEmployeeDelete()
+    {
+
+        $this->client->request('DELETE', '/employees/14');
+
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for DELETE /employees/14"
+        );
+    }
+
 }

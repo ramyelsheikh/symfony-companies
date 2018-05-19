@@ -46,40 +46,33 @@ class CompanyControllerTest extends WebTestCase
         );
     }
 
-    public function testCompleteScenario()
+    public function testComapnyEdit()
     {
         // Create a new entry in the database
-        $crawler = $this->client->request('GET', '/companies');
-        $this->assertEquals(200, $this->client->getResponse()->getStatusCode(), "Unexpected HTTP status code for GET /companies/");
+        $companyData = [
+            'name' => 'Test Company Edit',
+            'address' => 'Test Company Address Edit',
+        ];
 
-        /*
+        $this->client->request('PUT', '/companies/57', $companyData);
 
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check data in the show view
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("Test")')->count(), 'Missing element td:contains("Test")');
-
-        // Edit the entity
-        $crawler = $client->click($crawler->selectLink('Edit')->link());
-
-        $form = $crawler->selectButton('Update')->form(array(
-            'appbundle_company[field_name]'  => 'Foo',
-            // ... other fields to fill
-        ));
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check the element contains an attribute with value equals "Foo"
-        $this->assertGreaterThan(0, $crawler->filter('[value="Foo"]')->count(), 'Missing element [value="Foo"]');
-
-        // Delete the entity
-        $client->submit($crawler->selectButton('Delete')->form());
-        $crawler = $client->followRedirect();
-
-        // Check the entity has been delete on the list
-        $this->assertNotRegExp('/Foo/', $client->getResponse()->getContent());*/
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for PUT /companies/57"
+        );
     }
+
+    public function testComapnyDelete()
+    {
+
+        $this->client->request('DELETE', '/companies/57');
+
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for DELETE /companies/57"
+        );
+    }
+
 }

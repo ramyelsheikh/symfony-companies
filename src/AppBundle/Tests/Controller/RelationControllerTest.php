@@ -6,50 +6,71 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class RelationControllerTest extends WebTestCase
 {
-    /*
-    public function testCompleteScenario()
+    protected $client;
+
+    /**
+     * RelationControllerTest constructor.
+     */
+    public function __construct()
     {
+        parent::__construct();
         // Create a new client to browse the application
-        $client = static::createClient();
-
-        // Create a new entry in the database
-        $crawler = $client->request('GET', '/relation/');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), "Unexpected HTTP status code for GET /relation/");
-        $crawler = $client->click($crawler->selectLink('Create a new entry')->link());
-
-        // Fill in the form and submit it
-        $form = $crawler->selectButton('Create')->form(array(
-            'appbundle_relation[field_name]'  => 'Test',
-            // ... other fields to fill
-        ));
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check data in the show view
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("Test")')->count(), 'Missing element td:contains("Test")');
-
-        // Edit the entity
-        $crawler = $client->click($crawler->selectLink('Edit')->link());
-
-        $form = $crawler->selectButton('Update')->form(array(
-            'appbundle_relation[field_name]'  => 'Foo',
-            // ... other fields to fill
-        ));
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check the element contains an attribute with value equals "Foo"
-        $this->assertGreaterThan(0, $crawler->filter('[value="Foo"]')->count(), 'Missing element [value="Foo"]');
-
-        // Delete the entity
-        $client->submit($crawler->selectButton('Delete')->form());
-        $crawler = $client->followRedirect();
-
-        // Check the entity has been delete on the list
-        $this->assertNotRegExp('/Foo/', $client->getResponse()->getContent());
+        $this->client = static::createClient();
     }
 
-    */
+    public function testRelationIndex()
+    {
+        // Test relation listing
+        $this->client->request('GET', '/relations');
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for GET /relations"
+        );
+    }
+
+    public function testRelationCreate()
+    {
+        // Create a new entry in the database
+        $relationData = [
+            'name' => 'Daughter',
+        ];
+
+        $this->client->request('POST', '/relations', $relationData);
+
+        $this->assertEquals(
+            201,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for POST /relations"
+        );
+    }
+
+    public function testRelationEdit()
+    {
+        // Create a new entry in the database
+        $relationData = [
+            'name' => 'Son',
+        ];
+
+        $this->client->request('PUT', '/relations/2', $relationData);
+
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for PUT /relations/2"
+        );
+    }
+
+    public function testRelationDelete()
+    {
+
+        $this->client->request('DELETE', '/relations/2');
+
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for DELETE /relations/2"
+        );
+    }
+
 }
