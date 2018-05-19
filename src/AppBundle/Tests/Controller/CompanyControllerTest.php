@@ -6,22 +6,54 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class CompanyControllerTest extends WebTestCase
 {
-    /*
+    protected $client;
+
+    /**
+     * CompanyControllerTest constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        // Create a new client to browse the application
+        $this->client = static::createClient();
+    }
+
+    public function testCompanyIndex()
+    {
+        // Test company listing
+        $this->client->request('GET', '/companies');
+        $this->assertEquals(
+            200,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for GET /companies"
+        );
+    }
+
+    public function testComapnyCreate()
+    {
+        // Create a new entry in the database
+        $companyData = [
+            'name' => 'Test Company',
+            'address' => 'Test Company Address',
+        ];
+
+        $this->client->request('POST', '/companies', $companyData);
+
+        $this->assertEquals(
+            201,
+            $this->client->getResponse()->getStatusCode(),
+            "Unexpected HTTP status code for POST /companies"
+        );
+    }
+
     public function testCompleteScenario()
     {
-        // Create a new client to browse the application
-        $client = static::createClient();
-
         // Create a new entry in the database
-        $crawler = $client->request('GET', '/companies/');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), "Unexpected HTTP status code for GET /companies/");
-        $crawler = $client->click($crawler->selectLink('Create a new entry')->link());
+        $crawler = $this->client->request('GET', '/companies');
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode(), "Unexpected HTTP status code for GET /companies/");
 
-        // Fill in the form and submit it
-        $form = $crawler->selectButton('Create')->form(array(
-            'appbundle_company[field_name]'  => 'Test',
-            // ... other fields to fill
-        ));
+        /*
+
 
         $client->submit($form);
         $crawler = $client->followRedirect();
@@ -48,8 +80,6 @@ class CompanyControllerTest extends WebTestCase
         $crawler = $client->followRedirect();
 
         // Check the entity has been delete on the list
-        $this->assertNotRegExp('/Foo/', $client->getResponse()->getContent());
+        $this->assertNotRegExp('/Foo/', $client->getResponse()->getContent());*/
     }
-
-    */
 }

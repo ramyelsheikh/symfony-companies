@@ -60,7 +60,7 @@ class CompanyController extends FOSRestController
         $em->persist($data);
         $em->flush();
 
-        return new View($data, Response::HTTP_OK);
+        return new View($data, Response::HTTP_CREATED);
     }
 
     /**
