@@ -42,7 +42,7 @@ Then find the site at http://localhost:8000.
 ## Notes:
 While Updating Symfony and Creating Swagger Documentation, You can find API Documentation below:
 
-###Companies
+Companies
 
 1. Create Company:
 
@@ -75,7 +75,7 @@ While Updating Symfony and Creating Swagger Documentation, You can find API Docu
    GET /companies/{id}
 
 
-###Employees
+Employees
 
 1. Create Employee:
 
@@ -116,7 +116,7 @@ While Updating Symfony and Creating Swagger Documentation, You can find API Docu
    GET /employees/{id}
    
    
-###Dependants
+Dependants
 
 1. Create Dependant:
 
@@ -157,7 +157,7 @@ While Updating Symfony and Creating Swagger Documentation, You can find API Docu
    GET /dependant/{id}
    
    
-###Relations
+Relations
 
 1. Create Relation:
 
