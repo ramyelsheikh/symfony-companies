@@ -42,7 +42,7 @@ Then find the site at http://localhost:8000.
 ## Notes:
 While Updating Symfony and Creating Swagger Documentation, You can find API Documentation below:
 
-Companies
+#### Companies
 
 1. Create Company:
 
@@ -75,7 +75,7 @@ Companies
    GET /companies/{id}
 
 
-Employees
+#### Employees
 
 1. Create Employee:
 
@@ -116,7 +116,7 @@ Employees
    GET /employees/{id}
    
    
-Dependants
+#### Dependants
 
 1. Create Dependant:
 
@@ -157,7 +157,7 @@ Dependants
    GET /dependant/{id}
    
    
-Relations
+#### Relations
 
 1. Create Relation:
 
@@ -186,3 +186,18 @@ Relations
 4. Get Relation:
 
    GET /relations/{id}
+   
+   
+## Testing
+
+Make sure you have phpunit installed. Install it using 
+
+```bash
+sudo apt-get install phpunit
+```
+
+run the following command from the terminal from your project document root
+
+```bash
+./vendor/bin/phpunit
+```  
